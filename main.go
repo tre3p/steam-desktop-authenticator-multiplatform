@@ -46,8 +46,6 @@ func listMaFilesInDir() []string {
 	if _, err := os.Stat("./maFiles"); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir("./maFiles", os.ModePerm)
 		if err != nil {
-			fmt.Println(err.Error())
-			time.Sleep(time.Second * 20)
 			log.Fatal(err.Error())
 		}
 	}
