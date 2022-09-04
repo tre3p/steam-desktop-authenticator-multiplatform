@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"sda-multiplatform/custom_ui"
 	"strings"
 	"time"
 )
@@ -26,7 +27,8 @@ func BuildUI(dataLogin []string) {
 
 	ACCOUNT_LOGINS = dataLogin
 
-	list := widget.NewListWithData(data,
+	cList := custom_ui.CustomList{}
+	cList.List = widget.NewListWithData(data,
 		func() fyne.CanvasObject {
 			return widget.NewLabel("logins")
 		},
@@ -34,8 +36,8 @@ func BuildUI(dataLogin []string) {
 			o.(*widget.Label).Bind(i.(binding.String))
 		})
 
-	list.Move(fyne.NewPos(58, 210))
-	list.Resize(fyne.NewSize(390, 350))
+	cList.List.Move(fyne.NewPos(58, 210))
+	cList.List.Resize(fyne.NewSize(390, 350))
 	// account logins end
 
 	// text with key start
@@ -63,15 +65,17 @@ func BuildUI(dataLogin []string) {
 	p.Resize(fyne.NewSize(390, 18))
 	p.Move(fyne.NewPos(58, 109))
 
-	go addProgressBar(p)
+	go addProgressBar(p, &cList, c)
 	// progress bar end
 
 	// selecting account start
-	list.OnSelected = func(id widget.ListItemID) {
+	cList.List.OnSelected = func(id widget.ListItemID) {
 		login, _ := data.GetValue(id)
 		c.Text = GetLoginKey(login)
 		c.Refresh()
+		cList.SetCurrentSelected(login)
 	}
+
 	// selecting account end
 
 	// copy button start
@@ -83,7 +87,7 @@ func BuildUI(dataLogin []string) {
 	copyBtn.Move(fyne.NewPos(344, 22))
 	// copy button end
 
-	mainWindow.SetContent(container.NewWithoutLayout(c, copyBtn, list, p, w))
+	mainWindow.SetContent(container.NewWithoutLayout(c, copyBtn, cList.List, p, w))
 	mainWindow.ShowAndRun()
 }
 
@@ -99,7 +103,7 @@ func filterLogins(data *[]string, target string) []string {
 	return result
 }
 
-func addProgressBar(p *widget.ProgressBar) {
+func addProgressBar(p *widget.ProgressBar, l *custom_ui.CustomList, c *canvas.Text) {
 	for {
 		p.SetValue(1.0)
 		for i := 0.9; i >= 0.0; i -= 0.1 {
@@ -107,5 +111,7 @@ func addProgressBar(p *widget.ProgressBar) {
 			p.SetValue(i)
 		}
 		RefreshLoginKeys()
+		c.Text = GetLoginKey(l.Selected)
+		c.Refresh()
 	}
 }
