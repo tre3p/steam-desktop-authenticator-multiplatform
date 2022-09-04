@@ -15,11 +15,14 @@ This project is analogous to [Steam Desktop Authenticator](https://github.com/Je
 ## How to use
 
 - Download relevant version of application from [Releases](https://github.com/tre3p/steam-desktop-authenticator-multiplatform/releases) page.
-- Extract application to any folder you want, put your maFiles to maFiles folder and launch the application.
+- Extract application to any folder you want, put your maFiles to maFiles folder and launch the application with following command on Linux/MacOS:
+
+```sh
+chmod +X sda-multiplatform
+./sda-multiplatform
+```
 
 ## Build
-
-If you want to build application yourself - you can follow this guide.
 
 ### Windows
 
@@ -55,7 +58,7 @@ fyne package
 
 ### MacOS
 
-Coming soon. For now, only executable script available. You can build it using following command:
+Coming soon. For now, only executable script available. You can build and launch it using following commands:
 
 ```sh
 go build
