@@ -10,7 +10,7 @@ This product comes as is, which means that I don't provide any support, and the 
 
 ## Description
 
-This project is analogous to [Steam Desktop Authenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator) which is Windows-native application. Main idea of this project is cross-platform, which allow you to run application out of the box on all of your devices at once.
+This project is analogous to [Steam Desktop Authenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator) which is Windows-native application. Main idea of this project is cross-platform, which allow you to run application out of the box on all of your devices at once. For now, application supports running on MacOS, Linux, Windows.
 
 ## How to use
 
