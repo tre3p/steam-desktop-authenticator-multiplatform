@@ -32,11 +32,19 @@ func main() {
 
 	LOGIN_TO_KEY = steam.GetTwoFactor(&LOGIN_TO_SHARED)
 
-	BuildUI(accountNames)
+	currentPbValue := computePbCurrentValue()
+	BuildUI(accountNames, currentPbValue)
+}
+
+func computePbCurrentValue() int64 {
+	steamTime := steam.GetSteamTime()
+	currentSteamChunk := steamTime / 30
+	secondsUntilChange := steamTime - (currentSteamChunk * 30)
+
+	return 30 - secondsUntilChange
 }
 
 func RefreshLoginKeys() {
-	log.Println("refreshing keys")
 	LOGIN_TO_KEY = steam.GetTwoFactor(&LOGIN_TO_SHARED)
 }
 

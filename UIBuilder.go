@@ -15,7 +15,7 @@ import (
 
 var ACCOUNT_LOGINS []string
 
-func BuildUI(dataLogin []string) {
+func BuildUI(dataLogin []string, currentPbValue int64) {
 	app := app.New()
 	mainWindow := app.NewWindow("Steam Desktop Authenticator")
 	mainWindow.Resize(fyne.NewSize(500, 600))
@@ -62,10 +62,11 @@ func BuildUI(dataLogin []string) {
 
 	// progress bar start
 	p := widget.NewProgressBar()
+	p.Max = 30
 	p.Resize(fyne.NewSize(390, 18))
 	p.Move(fyne.NewPos(58, 109))
 
-	go addProgressBar(p, &cList, c)
+	go addProgressBar(currentPbValue, p, &cList, c)
 	// progress bar end
 
 	// selecting account start
@@ -103,15 +104,15 @@ func filterLogins(data *[]string, target string) []string {
 	return result
 }
 
-func addProgressBar(p *widget.ProgressBar, l *custom_ui.CustomList, c *canvas.Text) {
+func addProgressBar(currentMax int64, p *widget.ProgressBar, l *custom_ui.CustomList, c *canvas.Text) {
 	for {
-		p.SetValue(1.0)
-		for i := 0.9; i >= 0.0; i -= 0.1 {
-			time.Sleep(time.Millisecond * 2500)
-			p.SetValue(i)
+		for i := currentMax; i >= 0; i -= 1 {
+			p.SetValue(float64(i))
+			time.Sleep(time.Second)
 		}
 		RefreshLoginKeys()
 		c.Text = GetLoginKey(l.Selected)
 		c.Refresh()
+		currentMax = 30
 	}
 }
