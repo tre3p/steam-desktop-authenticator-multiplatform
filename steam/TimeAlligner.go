@@ -20,11 +20,13 @@ const (
 )
 
 func GetSteamTime() int64 {
-	allignSteamTime()
+	if !alligned {
+		alignSteamTime()
+	}
 	return time.Now().Unix() + timeDifference
 }
 
-func allignSteamTime() {
+func alignSteamTime() {
 	currentTime := time.Now().Unix()
 
 	resp, err := http.Post(STEAM_TIME_API, "", nil)
@@ -43,6 +45,6 @@ func allignSteamTime() {
 	json.Unmarshal(bodyBytes, &timeQuery)
 	steamServerTimeToInt, _ := strconv.Atoi(timeQuery.Response.ServerTime)
 
-	timeDifference = currentTime - int64(steamServerTimeToInt)
+	timeDifference = int64(steamServerTimeToInt) - currentTime
 	alligned = true
 }
