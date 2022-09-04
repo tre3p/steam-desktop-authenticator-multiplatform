@@ -3,14 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"sda-multiplatform/steam"
 	"sda-multiplatform/structs"
 	"strings"
-	"time"
 )
 
 const MAFILES_DIR = "maFiles/"
