@@ -1,118 +1,29 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
-	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"sda-multiplatform/steam"
-	"sda-multiplatform/structs"
-	"strings"
 )
 
-const MAFILES_DIR = "maFiles/"
-
-var (
-	LOGIN_TO_KEY    = make(map[string]string)
-	LOGIN_TO_SHARED = make(map[string]string)
-)
+var maFilesFolderPath = buildMaFilesDirectoryPath()
 
 func main() {
-	maFiles := listMaFilesInDir()
-	maFilesContent := readFiles(&maFiles)
-	maFilesStruct := mapMaFilesToStruct(&maFilesContent)
-	var accountNames []string
+	maFilesList := steam.ListMaFilesInDir(maFilesFolderPath)
+	maFilesJson := steam.ReadMaFilesToJson(&maFilesList)
+	maFilesStructs := steam.MapMaFilesJsonToStructs(&maFilesJson)
+	currentPbValue := steam.GetCurrentSteamChunk()
+	steam.InitStorage(&maFilesStructs)
 
-	for _, t := range maFilesStruct {
-		accountNames = append(accountNames, t.AccountName.(string))
-	}
-
-	extractSharedSecret(&maFilesStruct)
-
-	LOGIN_TO_KEY = steam.GetTwoFactor(&LOGIN_TO_SHARED)
-
-	currentPbValue := computePbCurrentValue()
-	BuildUI(accountNames, currentPbValue)
+	BuildUI(steam.AccountNames, currentPbValue)
 }
 
-func computePbCurrentValue() int64 {
-	steamTime := steam.GetSteamTime()
-	currentSteamChunk := steamTime / 30
-	secondsUntilChange := steamTime - (currentSteamChunk * 30)
-
-	return 30 - secondsUntilChange
-}
-
-func RefreshLoginKeys() {
-	LOGIN_TO_KEY = steam.GetTwoFactor(&LOGIN_TO_SHARED)
-}
-
-func listMaFilesInDir() []string {
-	if _, err := os.Stat("./maFiles"); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir("./maFiles", os.ModePerm)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-	}
-
-	files, err := ioutil.ReadDir("maFiles/")
-
+func buildMaFilesDirectoryPath() string {
+	workingDirectory, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error while getting working directory")
 	}
 
-	var result []string
-	for _, file := range files {
-		if strings.HasSuffix(file.Name(), ".maFile") && !file.IsDir() {
-			result = append(result, file.Name())
-		}
-	}
-
-	return result
-}
-
-func readFiles(data *[]string) []string {
-	var result []string
-
-	for _, d := range *data {
-		content, err := ioutil.ReadFile(MAFILES_DIR + d)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		result = append(result, string(content))
-	}
-
-	return result
-}
-
-func mapMaFilesToStruct(data *[]string) []structs.MaFile {
-	var result []structs.MaFile
-
-	for _, d := range *data {
-		tmp := structs.MaFile{}
-
-		err := json.Unmarshal([]byte(d), &tmp)
-
-		if err != nil {
-			log.Println("Error while reading json" + err.Error())
-			continue
-		}
-
-		result = append(result, tmp)
-	}
-
-	return result
-}
-
-func extractSharedSecret(data *[]structs.MaFile) {
-	for _, t := range *data {
-		LOGIN_TO_SHARED[t.AccountName.(string)] = t.SharedSecret.(string)
-	}
-}
-
-func GetLoginKey(login string) string {
-	return LOGIN_TO_KEY[login]
+	return filepath.Join(workingDirectory, "/maFiles/")
 }

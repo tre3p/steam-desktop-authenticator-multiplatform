@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	alligned             = false
+	aligned              = false
 	timeDifference int64 = 0
 )
 
@@ -20,10 +20,18 @@ const (
 )
 
 func GetSteamTime() int64 {
-	if !alligned {
+	if !aligned {
 		alignSteamTime()
 	}
 	return time.Now().Unix() + timeDifference
+}
+
+func GetCurrentSteamChunk() int64 {
+	steamTime := GetSteamTime()
+	currentSteamChunk := steamTime / 30
+	secondsUntilChange := steamTime - (currentSteamChunk * 30)
+
+	return 30 - secondsUntilChange
 }
 
 func alignSteamTime() {
@@ -46,5 +54,5 @@ func alignSteamTime() {
 	steamServerTimeToInt, _ := strconv.Atoi(timeQuery.Response.ServerTime)
 
 	timeDifference = int64(steamServerTimeToInt) - currentTime
-	alligned = true
+	aligned = true
 }

@@ -6,9 +6,11 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"sda-multiplatform/custom_ui"
+	"sda-multiplatform/steam"
 	"strings"
 	"time"
 )
@@ -18,77 +20,28 @@ var ACCOUNT_LOGINS []string
 func BuildUI(dataLogin []string, currentPbValue int64) {
 	app := app.New()
 	mainWindow := app.NewWindow("Steam Desktop Authenticator")
-	mainWindow.Resize(fyne.NewSize(500, 600))
-
-	// account logins start
-	data := binding.BindStringList(
-		&dataLogin,
-	)
-
+	mainWindow.Resize(fyne.NewSize(500, 650))
 	ACCOUNT_LOGINS = dataLogin
 
-	cList := custom_ui.CustomList{}
-	cList.List = widget.NewListWithData(data,
-		func() fyne.CanvasObject {
-			return widget.NewLabel("logins")
-		},
-		func(i binding.DataItem, o fyne.CanvasObject) {
-			o.(*widget.Label).Bind(i.(binding.String))
-		})
+	keyPlaceholder := buildKeyPlaceholder()
 
-	cList.List.Move(fyne.NewPos(58, 210))
-	cList.List.Resize(fyne.NewSize(390, 350))
-	// account logins end
+	data := binding.BindStringList(
+		&ACCOUNT_LOGINS,
+	)
+	cList := buildCustomList(data, keyPlaceholder)
 
-	// text with key start
-	c := canvas.NewText("", color.White)
-	c.Resize(fyne.NewSize(265, 80))
-	c.Move(fyne.NewPos(58, 22))
-	c.TextSize = 50
-	c.Alignment = fyne.TextAlignCenter
-	c.TextStyle = fyne.TextStyle{Bold: true}
-	// text with key end
+	searchEntry := buildSearchEntry(data)
 
-	// search field start
-	w := widget.NewEntry()
-	w.Resize(fyne.NewSize(390, 51))
-	w.Move(fyne.NewPos(58, 143))
-	w.SetPlaceHolder("Search...")
+	progressBar := buildProgressBar()
+	go addProgressBar(currentPbValue, progressBar, cList, keyPlaceholder)
 
-	w.OnChanged = func(s string) {
-		data.Set(filterLogins(&ACCOUNT_LOGINS, s))
-	}
-	// search field end
-
-	// progress bar start
-	p := widget.NewProgressBar()
-	p.Max = 30
-	p.Resize(fyne.NewSize(390, 18))
-	p.Move(fyne.NewPos(58, 109))
-
-	go addProgressBar(currentPbValue, p, &cList, c)
-	// progress bar end
-
-	// selecting account start
-	cList.List.OnSelected = func(id widget.ListItemID) {
-		login, _ := data.GetValue(id)
-		c.Text = GetLoginKey(login)
-		c.Refresh()
-		cList.SetCurrentSelected(login)
-	}
-
-	// selecting account end
-
-	// copy button start
 	copyBtn := widget.NewButton("Copy", func() {
-		mainWindow.Clipboard().SetContent(c.Text)
+		mainWindow.Clipboard().SetContent(keyPlaceholder.Text)
 	})
-
 	copyBtn.Resize(fyne.NewSize(104, 80))
-	copyBtn.Move(fyne.NewPos(344, 22))
-	// copy button end
+	copyBtn.Move(fyne.NewPos(344, 69))
 
-	mainWindow.SetContent(container.NewWithoutLayout(c, copyBtn, cList.List, p, w))
+	mainWindow.SetContent(container.NewWithoutLayout(addImportDropDown(mainWindow), keyPlaceholder, copyBtn, cList.List, progressBar, searchEntry))
 	mainWindow.ShowAndRun()
 }
 
@@ -104,14 +57,99 @@ func filterLogins(data *[]string, target string) []string {
 	return result
 }
 
+func addImportDropDown(parentWindow fyne.Window) *widget.Select {
+	dropDown := widget.NewSelect(
+		[]string{"Import account", "Import accounts.."},
+		func(s string) {
+			switch s {
+			case "Import account":
+				handleImportSingleMaFile(parentWindow)
+			case "Import accounts..":
+				// dosmth
+			}
+		})
+
+	dropDown.PlaceHolder = "Import"
+	dropDown.Resize(fyne.NewSize(93, 33))
+	dropDown.Move(fyne.NewPos(58, 22))
+
+	return dropDown
+}
+
+func handleImportSingleMaFile(parentWindow fyne.Window) {
+	d := dialog.NewFileOpen(func(closer fyne.URIReadCloser, err error) {
+		//f, err := os.Open(closer.URI().Path())
+	}, parentWindow)
+
+	d.Resize(fyne.NewSize(600, 600))
+	d.Show()
+
+}
+
+func buildProgressBar() *widget.ProgressBar {
+	p := widget.NewProgressBar()
+	p.Max = 30
+	p.Resize(fyne.NewSize(390, 18))
+	p.Move(fyne.NewPos(58, 166))
+
+	return p
+}
+
+func buildCustomList(data binding.ExternalStringList, keyPlaceholder *canvas.Text) *custom_ui.CustomList {
+	cList := custom_ui.CustomList{}
+	cList.List = widget.NewListWithData(data,
+		func() fyne.CanvasObject {
+			return widget.NewLabel("logins")
+		},
+		func(i binding.DataItem, o fyne.CanvasObject) {
+			o.(*widget.Label).Bind(i.(binding.String))
+		})
+
+	cList.List.Move(fyne.NewPos(58, 265))
+	cList.List.Resize(fyne.NewSize(390, 350))
+
+	cList.List.OnSelected = func(id widget.ListItemID) {
+		login, _ := data.GetValue(id)
+		keyPlaceholder.Text = steam.GetLoginKey(login)
+		keyPlaceholder.Refresh()
+		cList.SetCurrentSelected(login)
+	}
+
+	return &cList
+}
+
+func buildKeyPlaceholder() *canvas.Text {
+	c := canvas.NewText("", color.White)
+	c.Resize(fyne.NewSize(265, 80))
+	c.Move(fyne.NewPos(58, 69))
+	c.TextSize = 50
+	c.Alignment = fyne.TextAlignCenter
+	c.TextStyle = fyne.TextStyle{Bold: true}
+
+	return c
+}
+
+func buildSearchEntry(data binding.ExternalStringList) *widget.Entry {
+	w := widget.NewEntry()
+	w.Resize(fyne.NewSize(390, 51))
+	w.Move(fyne.NewPos(58, 199))
+	w.SetPlaceHolder("Search...")
+
+	w.OnChanged = func(s string) {
+		data.Set(filterLogins(&steam.AccountNames, s))
+	}
+
+	return w
+}
+
 func addProgressBar(currentMax int64, p *widget.ProgressBar, l *custom_ui.CustomList, c *canvas.Text) {
 	for {
 		for i := currentMax; i >= 0; i -= 1 {
 			p.SetValue(float64(i))
 			time.Sleep(time.Second)
 		}
-		RefreshLoginKeys()
-		c.Text = GetLoginKey(l.Selected)
+		steam.RefreshLoginKeys()
+		c.Text = steam.GetLoginKey(l.Selected)
 		c.Refresh()
 		currentMax = 30
 	}
