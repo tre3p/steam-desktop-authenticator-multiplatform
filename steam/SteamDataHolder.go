@@ -28,3 +28,12 @@ func RefreshLoginKeys() {
 func GetLoginKey(login string) string {
 	return AccountNameToKey[login]
 }
+
+func AccountNamesContains(target string) bool {
+	for _, e := range AccountNames {
+		if e == target {
+			return true
+		}
+	}
+	return false
+}
