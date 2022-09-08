@@ -16,7 +16,6 @@ func ReadMaFilesToJson(maFilePaths *[]string) []string {
 
 	for _, file := range *maFilePaths {
 		maFileContent, err := ioutil.ReadFile(file)
-
 		if err != nil {
 			log.Fatal(err)
 		}

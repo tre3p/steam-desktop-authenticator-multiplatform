@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"log"
+	"os"
 	"sda-multiplatform/custom_ui"
 	"sda-multiplatform/steam"
 	"strings"
@@ -41,7 +43,9 @@ func BuildUI(dataLogin []string, currentPbValue int64) {
 	copyBtn.Resize(fyne.NewSize(104, 80))
 	copyBtn.Move(fyne.NewPos(344, 69))
 
-	mainWindow.SetContent(container.NewWithoutLayout(addImportDropDown(mainWindow), keyPlaceholder, copyBtn, cList.List, progressBar, searchEntry))
+	dropDown := addImportDropDown(data, mainWindow)
+
+	mainWindow.SetContent(container.NewWithoutLayout(dropDown, keyPlaceholder, copyBtn, cList.List, progressBar, searchEntry))
 	mainWindow.ShowAndRun()
 }
 
@@ -57,13 +61,14 @@ func filterLogins(data *[]string, target string) []string {
 	return result
 }
 
-func addImportDropDown(parentWindow fyne.Window) *widget.Select {
+func addImportDropDown(dataBind binding.ExternalStringList, parentWindow fyne.Window) *widget.Select {
 	dropDown := widget.NewSelect(
 		[]string{"Import account", "Import accounts.."},
 		func(s string) {
 			switch s {
 			case "Import account":
 				handleImportSingleMaFile(parentWindow)
+				dataBind.Reload()
 			case "Import accounts..":
 				// dosmth
 			}
@@ -78,12 +83,17 @@ func addImportDropDown(parentWindow fyne.Window) *widget.Select {
 
 func handleImportSingleMaFile(parentWindow fyne.Window) {
 	d := dialog.NewFileOpen(func(closer fyne.URIReadCloser, err error) {
-		//f, err := os.Open(closer.URI().Path())
+		f, fileErr := os.Open(closer.URI().Path())
+
+		if fileErr != nil {
+			log.Fatalln(fileErr)
+		}
+
+		handleNewMaFile(f.Name())
 	}, parentWindow)
 
 	d.Resize(fyne.NewSize(600, 600))
 	d.Show()
-
 }
 
 func buildProgressBar() *widget.ProgressBar {

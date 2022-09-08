@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sda-multiplatform/steam"
+	"sda-multiplatform/util"
 )
 
 var maFilesFolderPath = buildMaFilesDirectoryPath()
@@ -26,4 +27,17 @@ func buildMaFilesDirectoryPath() string {
 	}
 
 	return filepath.Join(workingDirectory, "/maFiles/")
+}
+
+func handleNewMaFile(srcFilePath string) {
+	maFileContent := steam.ReadMaFilesToJson(&[]string{srcFilePath})
+	maFileStruct := steam.MapMaFilesJsonToStructs(&maFileContent)
+
+	if util.IsFolderContain(maFilesFolderPath, filepath.Base(srcFilePath)) || steam.AccountNamesContains(maFileStruct[0].AccountName.(string)) {
+		return
+	}
+
+	util.Copy(srcFilePath, maFilesFolderPath)
+
+	steam.InitStorage(&maFileStruct)
 }
