@@ -125,10 +125,6 @@ func handleImportMaFilesFolder(parentWindow fyne.Window) {
 		parentWindow.Hide()
 	}, parentWindow)
 
-	d.SetOnClosed(func() {
-		parentWindow.Hide()
-	})
-
 	d.Resize(fyne.NewSize(600, 600))
 	d.Show()
 }
