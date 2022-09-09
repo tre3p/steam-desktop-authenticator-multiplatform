@@ -6,84 +6,51 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"log"
+	"os"
+	"sda-multiplatform/custom_ui"
+	"sda-multiplatform/steam"
 	"strings"
 	"time"
 )
 
 var ACCOUNT_LOGINS []string
 
-func BuildUI(dataLogin []string) {
+func BuildUI(dataLogin []string, currentPbValue int64) {
 	app := app.New()
 	mainWindow := app.NewWindow("Steam Desktop Authenticator")
-	mainWindow.Resize(fyne.NewSize(500, 600))
+	mainWindow.Resize(fyne.NewSize(500, 650))
 
-	// account logins start
-	data := binding.BindStringList(
-		&dataLogin,
-	)
+	accountImportingWindow := app.NewWindow("Account import")
+	accountImportingWindow.Resize(fyne.NewSize(600, 600))
 
 	ACCOUNT_LOGINS = dataLogin
 
-	list := widget.NewListWithData(data,
-		func() fyne.CanvasObject {
-			return widget.NewLabel("logins")
-		},
-		func(i binding.DataItem, o fyne.CanvasObject) {
-			o.(*widget.Label).Bind(i.(binding.String))
-		})
+	keyPlaceholder := buildKeyPlaceholder()
 
-	list.Move(fyne.NewPos(58, 210))
-	list.Resize(fyne.NewSize(390, 350))
-	// account logins end
+	data := binding.BindStringList(
+		&ACCOUNT_LOGINS,
+	)
+	cList := buildCustomList(data, keyPlaceholder)
 
-	// text with key start
-	c := canvas.NewText("", color.White)
-	c.Resize(fyne.NewSize(265, 80))
-	c.Move(fyne.NewPos(58, 22))
-	c.TextSize = 50
-	c.Alignment = fyne.TextAlignCenter
-	c.TextStyle = fyne.TextStyle{Bold: true}
-	// text with key end
+	searchEntry := buildSearchEntry(data)
 
-	// search field start
-	w := widget.NewEntry()
-	w.Resize(fyne.NewSize(390, 51))
-	w.Move(fyne.NewPos(58, 143))
-	w.SetPlaceHolder("Search...")
+	progressBar := buildProgressBar()
+	go addProgressBar(currentPbValue, progressBar, cList, keyPlaceholder)
 
-	w.OnChanged = func(s string) {
-		data.Set(filterLogins(&ACCOUNT_LOGINS, s))
-	}
-	// search field end
-
-	// progress bar start
-	p := widget.NewProgressBar()
-	p.Resize(fyne.NewSize(390, 18))
-	p.Move(fyne.NewPos(58, 109))
-
-	go addProgressBar(p)
-	// progress bar end
-
-	// selecting account start
-	list.OnSelected = func(id widget.ListItemID) {
-		login, _ := data.GetValue(id)
-		c.Text = GetLoginKey(login)
-		c.Refresh()
-	}
-	// selecting account end
-
-	// copy button start
 	copyBtn := widget.NewButton("Copy", func() {
-		mainWindow.Clipboard().SetContent(c.Text)
+		mainWindow.Clipboard().SetContent(keyPlaceholder.Text)
 	})
-
 	copyBtn.Resize(fyne.NewSize(104, 80))
-	copyBtn.Move(fyne.NewPos(344, 22))
-	// copy button end
+	copyBtn.Move(fyne.NewPos(344, 69))
 
-	mainWindow.SetContent(container.NewWithoutLayout(c, copyBtn, list, p, w))
+	dropDown := addImportDropDown(accountImportingWindow)
+
+	mainWindow.SetContent(container.NewWithoutLayout(dropDown, keyPlaceholder, copyBtn, cList.List, progressBar, searchEntry))
+	mainWindow.SetMaster()
 	mainWindow.ShowAndRun()
 }
 
@@ -99,13 +66,138 @@ func filterLogins(data *[]string, target string) []string {
 	return result
 }
 
-func addProgressBar(p *widget.ProgressBar) {
-	for {
-		p.SetValue(1.0)
-		for i := 0.9; i >= 0.0; i -= 0.1 {
-			time.Sleep(time.Millisecond * 2500)
-			p.SetValue(i)
+func addImportDropDown(parentWindow fyne.Window) *widget.Select {
+	dropDown := widget.NewSelect(
+		[]string{"Import account", "Import accounts.."},
+		func(s string) {
+			switch s {
+			case "Import account":
+				handleImportSingleMaFile(parentWindow)
+			case "Import accounts..":
+				handleImportMaFilesFolder(parentWindow)
+			}
+		})
+
+	dropDown.PlaceHolder = "Import"
+	dropDown.Resize(fyne.NewSize(93, 33))
+	dropDown.Move(fyne.NewPos(58, 22))
+
+	return dropDown
+}
+
+func handleImportSingleMaFile(parentWindow fyne.Window) {
+	parentWindow.Show()
+	d := dialog.NewFileOpen(func(closer fyne.URIReadCloser, err error) {
+		parentWindow.Hide()
+
+		if closer == nil {
+			return
 		}
-		RefreshLoginKeys()
+
+		f, fileErr := os.Open(closer.URI().Path())
+
+		if fileErr != nil {
+			log.Fatal(fileErr)
+		}
+
+		handleNewMaFile(f.Name())
+	}, parentWindow)
+
+	d.Resize(fyne.NewSize(600, 600))
+	d.Show()
+}
+
+func handleImportMaFilesFolder(parentWindow fyne.Window) {
+	parentWindow.Show()
+	d := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
+		parentWindow.Hide()
+
+		if uri == nil {
+			return
+		}
+
+		f, folderErr := os.Open(uri.Path())
+		if folderErr != nil {
+			log.Fatal(folderErr)
+		}
+
+		handleNewMaFilesFolder(f.Name())
+		parentWindow.Hide()
+	}, parentWindow)
+
+	d.SetOnClosed(func() {
+		parentWindow.Hide()
+	})
+
+	d.Resize(fyne.NewSize(600, 600))
+	d.Show()
+}
+
+func buildProgressBar() *widget.ProgressBar {
+	p := widget.NewProgressBar()
+	p.Max = 30
+	p.Resize(fyne.NewSize(390, 18))
+	p.Move(fyne.NewPos(58, 166))
+
+	return p
+}
+
+func buildCustomList(data binding.ExternalStringList, keyPlaceholder *canvas.Text) *custom_ui.CustomList {
+	cList := custom_ui.CustomList{}
+	cList.List = widget.NewListWithData(data,
+		func() fyne.CanvasObject {
+			return widget.NewLabel("logins")
+		},
+		func(i binding.DataItem, o fyne.CanvasObject) {
+			o.(*widget.Label).Bind(i.(binding.String))
+		})
+
+	cList.List.Move(fyne.NewPos(58, 265))
+	cList.List.Resize(fyne.NewSize(390, 350))
+
+	cList.List.OnSelected = func(id widget.ListItemID) {
+		login, _ := data.GetValue(id)
+		keyPlaceholder.Text = steam.GetLoginKey(login)
+		keyPlaceholder.Refresh()
+		cList.SetCurrentSelected(login)
+	}
+
+	return &cList
+}
+
+func buildKeyPlaceholder() *canvas.Text {
+	c := canvas.NewText("", color.White)
+	c.Resize(fyne.NewSize(265, 80))
+	c.Move(fyne.NewPos(58, 69))
+	c.TextSize = 50
+	c.Alignment = fyne.TextAlignCenter
+	c.TextStyle = fyne.TextStyle{Bold: true}
+
+	return c
+}
+
+func buildSearchEntry(data binding.ExternalStringList) *widget.Entry {
+	w := widget.NewEntry()
+	w.Resize(fyne.NewSize(390, 51))
+	w.Move(fyne.NewPos(58, 199))
+	w.SetPlaceHolder("Search...")
+
+	w.OnChanged = func(s string) {
+		data.Set(filterLogins(&steam.AccountNames, s))
+	}
+
+	return w
+}
+
+func addProgressBar(currentMax int64, p *widget.ProgressBar, l *custom_ui.CustomList, c *canvas.Text) {
+	for {
+		for i := currentMax; i >= 0; i -= 1 {
+			p.SetValue(float64(i))
+			time.Sleep(time.Second)
+		}
+		steam.RefreshLoginKeys()
+		c.Text = steam.GetLoginKey(l.Selected)
+		c.Refresh()
+		currentMax = 30
 	}
 }
