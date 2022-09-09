@@ -1,6 +1,8 @@
 package steam
 
-import "sda-multiplatform/structs"
+import (
+	"sda-multiplatform/structs"
+)
 
 var (
 	AccountNameToKey          = make(map[string]string)

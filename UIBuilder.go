@@ -23,6 +23,10 @@ func BuildUI(dataLogin []string, currentPbValue int64) {
 	app := app.New()
 	mainWindow := app.NewWindow("Steam Desktop Authenticator")
 	mainWindow.Resize(fyne.NewSize(500, 650))
+
+	accountImportingWindow := app.NewWindow("Account import")
+	accountImportingWindow.Resize(fyne.NewSize(600, 600))
+
 	ACCOUNT_LOGINS = dataLogin
 
 	keyPlaceholder := buildKeyPlaceholder()
@@ -43,9 +47,10 @@ func BuildUI(dataLogin []string, currentPbValue int64) {
 	copyBtn.Resize(fyne.NewSize(104, 80))
 	copyBtn.Move(fyne.NewPos(344, 69))
 
-	dropDown := addImportDropDown(data, mainWindow)
+	dropDown := addImportDropDown(data, accountImportingWindow)
 
 	mainWindow.SetContent(container.NewWithoutLayout(dropDown, keyPlaceholder, copyBtn, cList.List, progressBar, searchEntry))
+	mainWindow.SetMaster()
 	mainWindow.ShowAndRun()
 }
 
@@ -68,10 +73,10 @@ func addImportDropDown(dataBind binding.ExternalStringList, parentWindow fyne.Wi
 			switch s {
 			case "Import account":
 				handleImportSingleMaFile(parentWindow)
-				dataBind.Reload()
 			case "Import accounts..":
-				// dosmth
+				handleImportMaFilesFolder(parentWindow)
 			}
+			dataBind.Reload()
 		})
 
 	dropDown.PlaceHolder = "Import"
@@ -82,14 +87,32 @@ func addImportDropDown(dataBind binding.ExternalStringList, parentWindow fyne.Wi
 }
 
 func handleImportSingleMaFile(parentWindow fyne.Window) {
+	parentWindow.Show()
 	d := dialog.NewFileOpen(func(closer fyne.URIReadCloser, err error) {
 		f, fileErr := os.Open(closer.URI().Path())
 
 		if fileErr != nil {
-			log.Fatalln(fileErr)
+			log.Fatal(fileErr)
 		}
 
+		parentWindow.Hide()
 		handleNewMaFile(f.Name())
+	}, parentWindow)
+
+	d.Resize(fyne.NewSize(600, 600))
+	d.Show()
+}
+
+func handleImportMaFilesFolder(parentWindow fyne.Window) {
+	parentWindow.Show()
+	d := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
+		f, folderErr := os.Open(uri.Path())
+		if folderErr != nil {
+			log.Fatal(folderErr)
+		}
+
+		parentWindow.Hide()
+		handleNewMaFilesFolder(f.Name())
 	}, parentWindow)
 
 	d.Resize(fyne.NewSize(600, 600))
