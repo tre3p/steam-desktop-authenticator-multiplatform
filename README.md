@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="pic.png" height="600" width=500" />
+    <img src="pic.png" height="600" width=600" />
     </br>
     SDA Multiplatform
 </h1>
