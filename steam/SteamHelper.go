@@ -34,7 +34,7 @@ func MapMaFilesJsonToStructs(data *[]string) []structs.MaFile {
 		err := json.Unmarshal([]byte(jsonContent), &tmpStruct)
 
 		if err != nil {
-			log.Fatal(err)
+			continue
 		}
 
 		result = append(result, tmpStruct)
