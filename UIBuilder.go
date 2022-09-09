@@ -47,7 +47,7 @@ func BuildUI(dataLogin []string, currentPbValue int64) {
 	copyBtn.Resize(fyne.NewSize(104, 80))
 	copyBtn.Move(fyne.NewPos(344, 69))
 
-	dropDown := addImportDropDown(data, accountImportingWindow)
+	dropDown := addImportDropDown(accountImportingWindow)
 
 	mainWindow.SetContent(container.NewWithoutLayout(dropDown, keyPlaceholder, copyBtn, cList.List, progressBar, searchEntry))
 	mainWindow.SetMaster()
@@ -66,7 +66,7 @@ func filterLogins(data *[]string, target string) []string {
 	return result
 }
 
-func addImportDropDown(dataBind binding.ExternalStringList, parentWindow fyne.Window) *widget.Select {
+func addImportDropDown(parentWindow fyne.Window) *widget.Select {
 	dropDown := widget.NewSelect(
 		[]string{"Import account", "Import accounts.."},
 		func(s string) {
@@ -76,7 +76,6 @@ func addImportDropDown(dataBind binding.ExternalStringList, parentWindow fyne.Wi
 			case "Import accounts..":
 				handleImportMaFilesFolder(parentWindow)
 			}
-			dataBind.Reload()
 		})
 
 	dropDown.PlaceHolder = "Import"
@@ -89,13 +88,18 @@ func addImportDropDown(dataBind binding.ExternalStringList, parentWindow fyne.Wi
 func handleImportSingleMaFile(parentWindow fyne.Window) {
 	parentWindow.Show()
 	d := dialog.NewFileOpen(func(closer fyne.URIReadCloser, err error) {
+		parentWindow.Hide()
+
+		if closer == nil {
+			return
+		}
+
 		f, fileErr := os.Open(closer.URI().Path())
 
 		if fileErr != nil {
 			log.Fatal(fileErr)
 		}
 
-		parentWindow.Hide()
 		handleNewMaFile(f.Name())
 	}, parentWindow)
 
@@ -106,14 +110,24 @@ func handleImportSingleMaFile(parentWindow fyne.Window) {
 func handleImportMaFilesFolder(parentWindow fyne.Window) {
 	parentWindow.Show()
 	d := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
+		parentWindow.Hide()
+
+		if uri == nil {
+			return
+		}
+
 		f, folderErr := os.Open(uri.Path())
 		if folderErr != nil {
 			log.Fatal(folderErr)
 		}
 
-		parentWindow.Hide()
 		handleNewMaFilesFolder(f.Name())
+		parentWindow.Hide()
 	}, parentWindow)
+
+	d.SetOnClosed(func() {
+		parentWindow.Hide()
+	})
 
 	d.Resize(fyne.NewSize(600, 600))
 	d.Show()
