@@ -1,11 +1,8 @@
+use std::collections::HashMap;
+use std::hash::Hash;
 use serde_json::Value;
 use crate::utils::file_utils;
-
-#[derive(Debug)]
-pub struct MaFile {
-    pub account_name: String,
-    pub shared_secret: String
-}
+use crate::steam::models::MaFile;
 
 pub fn parse_mafiles(paths: Vec<String>) -> Vec<MaFile> {
     let mut parsed_mafiles: Vec<MaFile> = Vec::new();
@@ -28,4 +25,14 @@ pub fn parse_mafiles(paths: Vec<String>) -> Vec<MaFile> {
     }
 
     parsed_mafiles
+}
+
+pub fn convert_mafiles_to_map(mafiles: &Vec<MaFile>) -> HashMap<String, String> {
+    let mut result_map: HashMap<String, String> = HashMap::new();
+
+    for mafile in mafiles {
+        result_map.insert(mafile.account_name.clone(), mafile.shared_secret.clone());
+    }
+
+    result_map
 }
