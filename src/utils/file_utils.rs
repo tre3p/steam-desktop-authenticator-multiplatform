@@ -38,5 +38,5 @@ pub fn list_dir_files_by_extension(path: &str, ext: &str) -> Vec<String> {
 }
 
 pub fn read_file(file_path: &str) -> Result<String> {
-    fs::read_to_string(Path::new(file_path))
+    fs::read_to_string(file_path)
 }
