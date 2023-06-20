@@ -1,6 +1,6 @@
 use chrono::Utc;
 use reqwest::Method;
-use crate::utils::steam_utils;
+use crate::utils::http_utils;
 
 /**
 URL to retrieve Steam server time from
@@ -34,33 +34,33 @@ impl SteamTime {
     /**
     Returns current time on Steam server
     **/
-    pub fn get_steam_time(&mut self) -> i64 {
+    pub fn get_steam_time(&mut self) -> Result<i64, &str> {
         if !self.aligned {
-            let time_diff = self.align_steam_time();
+            let time_diff = self.align_steam_time().unwrap();
             self.time_diff = time_diff;
             self.aligned = true;
         }
 
-        Utc::now().timestamp() + self.time_diff
+        Ok(Utc::now().timestamp() + self.time_diff)
     }
 
     /**
     Calculates current steam chunk to know when auth codes need to be refresh
      **/
-    pub fn get_current_steam_chunk(&mut self) -> i64 {
-        let current_steam_time = self.get_steam_time();
+    pub fn get_current_steam_chunk(&mut self) -> Result<i64, &str> {
+        let current_steam_time = self.get_steam_time().unwrap();
         let current_steam_chunk = current_steam_time / 30;
         let seconds_until_change = current_steam_time - (current_steam_chunk * 30);
 
-        30 - seconds_until_change
+        Ok(30 - seconds_until_change)
     }
 
     /**
     Aligns self time difference between local time and Steam server time
     **/
-    fn align_steam_time(&self) -> i64 {
+    fn align_steam_time(&self) -> Result<i64, String> {
         let current_time = Utc::now().timestamp();
-        let steam_resp = steam_utils::execute_blank_http_request(STEAM_TIME_API_URL, Method::POST);
+        let steam_resp = http_utils::execute_blank_http_request(STEAM_TIME_API_URL, Method::POST);
 
         match steam_resp {
             Ok(json) => {
@@ -68,11 +68,11 @@ impl SteamTime {
                 let steam_server_time = steam_server_time.as_str().unwrap();
 
                 let time_diff: i64 = steam_server_time.trim().parse::<i64>().unwrap() - current_time;
-                time_diff
+                Ok(time_diff)
             }
             Err(err) => {
                 println!("Error while parsing time_diff: {}", err);
-                -1
+                Err(err.to_string())
             }
         }
     }
