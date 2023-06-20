@@ -22,7 +22,14 @@ pub fn create_dir_if_not_exists(path: &str) {
     println!("Folder {} already exists", path);
 }
 
-pub fn list_dir_files_by_extension(path: &str, ext: &str) -> Vec<String> {
+pub fn list_files_by_extension(path: &str, ext: &str) -> Vec<String> {
+
+    if !Path::new(path).is_dir() {
+        if path.ends_with(ext) {
+            return vec![path.to_string()];
+        }
+    }
+
     let mut filtered_files: Vec<String> = Vec::new();
     let all_dir_files = fs::read_dir(path).unwrap();
 
