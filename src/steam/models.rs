@@ -7,7 +7,7 @@ use crate::utils;
 Structs represents part of .maFile content.
 Hold "account_name" and "shared_secret" values from .maFile.
 **/
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MaFile {
     pub account_name: String,
     pub shared_secret: String
@@ -37,13 +37,12 @@ impl MaFileDir {
         }
     }
 
-    // TODO: copy_to_dir, get_secret_by_name...
     pub fn copy_to_dir(&mut self, path: &str) {
         let mafiles_list = utils::file_utils::list_files_by_extension(path, ".maFile");
 
         for mafile_path in &mafiles_list {
             let mafile_parsed = utils::mafile_utils::parse_mafiles(vec![mafile_path.to_string()]);
-            let mafile = &mafile_parsed[0];
+            let mafile = mafile_parsed.get(0).unwrap();
 
             match self.name_to_secret.get(&mafile.account_name) {
                 Some(_) => {
@@ -60,7 +59,10 @@ impl MaFileDir {
                     fs::copy(&mafile_path, copied_mafile_path)
                         .expect("Unable to copy maFile to software dir.");
 
-                    // TODO: insert 'mafile' variable to self.mafiles and to name_to_secret map
+                    // TODO: change this ugly clones
+                    let cloned = mafile.clone();
+                    self.name_to_secret.insert(cloned.account_name, mafile.clone().shared_secret);
+                    self.mafiles.push(mafile.clone());
                 }
             }
         }
