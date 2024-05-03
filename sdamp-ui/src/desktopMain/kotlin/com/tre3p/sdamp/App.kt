@@ -2,6 +2,8 @@ package com.tre3p.sdamp
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
@@ -9,9 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import com.tre3p.sdamp.mafile.MaFileReader
 import com.tre3p.sdamp.model.MaFile
 import java.io.File
@@ -41,16 +45,25 @@ fun App() {
 
 @Composable
 fun TopButtons() {
+    var showFilePicker by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isExpanded by interactionSource.collectIsHoveredAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = START_PADDING, end = END_PADDING, top = 5.dp)
     ) {
         Button(
-            onClick = {},
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)
+            onClick = { showFilePicker = true },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
         ) {
             Text("Import")
+        }
+        FilePicker(show = showFilePicker) {
+            showFilePicker = false
+            // TODO: do something with picked file
+            println(it?.path)
         }
     }
 }
