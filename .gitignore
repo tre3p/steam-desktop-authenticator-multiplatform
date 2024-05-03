@@ -1,4 +1,5 @@
 *.iml
 .gradle
+/.idea
 **/build/
 /.fleet
