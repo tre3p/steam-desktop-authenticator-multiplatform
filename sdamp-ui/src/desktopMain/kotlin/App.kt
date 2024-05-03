@@ -12,8 +12,8 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-import steam_desktop_authenticator_multiplatform.composeapp.generated.resources.Res
-import steam_desktop_authenticator_multiplatform.composeapp.generated.resources.compose_multiplatform
+import steam_desktop_authenticator_multiplatform.sdamp_ui.generated.resources.Res
+import steam_desktop_authenticator_multiplatform.sdamp_ui.generated.resources.compose_multiplatform
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
