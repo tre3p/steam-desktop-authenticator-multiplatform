@@ -5,9 +5,6 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
 }
 
-group = "com.tre3p"
-version = "0.1.0"
-
 kotlin {
     jvm("desktop")
     
@@ -24,6 +21,7 @@ kotlin {
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(project(":sdamp-api"))
         }
     }
 }
