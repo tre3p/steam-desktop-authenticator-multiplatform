@@ -28,4 +28,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":sdamp-ui")
+include(":sdamp-ui", "sdamp-api")
