@@ -36,59 +36,10 @@ fun App() {
 
 @Composable
 fun TwoFactorCodePlaceholder(twoFactorCodeText: String) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 50.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .height(intrinsicSize = IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 25.dp)
-                    .weight(20f)
-                    .height(56.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = twoFactorCodeText,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                )
-            }
 
-            Button(
-                onClick = { println("not yet") },
-                modifier = Modifier.height(56.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
-            ) {
-                Text(
-                    text = "Copy",
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun MaFilesList(maFiles: List<MaFile>, twoFactorCodeText: String) {
-    Column(
-        modifier = Modifier
-            .padding(200.dp)
-            .background(Color.LightGray)
-            .verticalScroll(rememberScrollState()),
-    ) {
-        maFiles.forEach {
-            Text(
-                text = it.accountName,
-                textAlign = TextAlign.Center
-                // TODO: assign new code to twoFactorCodeText when clicked
-            )
-        }
-    }
+
 }
