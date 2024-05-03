@@ -6,7 +6,7 @@ import androidx.compose.ui.window.application
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "steam-desktop-authenticator-multiplatform",
+        title = "SDAMP",
     ) {
         App()
     }
