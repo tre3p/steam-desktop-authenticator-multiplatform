@@ -12,16 +12,13 @@ open class MaFileReader {
 
     private val jsonParser = Json { ignoreUnknownKeys = true }
 
-    fun readMaFileDir(maFileDirPath: Path): Set<MaFile> {
-        println("got dir path: " + maFileDirPath)
-        println(maFileDirPath.isDirectory())
+    fun readMaFileDir(maFileDirPath: Path): List<MaFile> {
         return maFileDirPath.useDirectoryEntries("*.maFile") { seq ->
-            seq.map { println(it); readMaFile(it) }.toSet()
+            seq.map { readMaFile(it) }.toList()
         }
     }
 
     fun readMaFile(maFilePath: Path): MaFile {
-        println("reading" + maFilePath)
         return maFilePath.readText().let {
             jsonParser.decodeFromString<MaFile>(it)
         }

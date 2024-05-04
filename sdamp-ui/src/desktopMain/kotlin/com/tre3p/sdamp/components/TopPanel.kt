@@ -56,17 +56,24 @@ fun TopPanel(maFileList: SnapshotStateList<MaFile>) {
             showFilesPicker = false
 
             paths?.forEach {
-                maFileList.add(MaFileReader.readMaFile(Paths.get(it.path)))
+                val readMaFile = MaFileReader.readMaFile(Paths.get(it.path))
+                if (!maFileList.contains(readMaFile)) maFileList.add(readMaFile)
             }
         }
         DirectoryPicker(show = showDirPicker) {
             showDirPicker = false
-            println(it)
 
             it?.let { dirPath ->
-                println(MaFileReader.readMaFileDir(Paths.get(dirPath)).size)
-                maFileList.addAll(MaFileReader.readMaFileDir(Paths.get(dirPath)))
+                val readMaFiles = MaFileReader.readMaFileDir(Paths.get(dirPath))
+                maFileList.addAll(filterUniqueMaFiles(maFileList.toList(), readMaFiles))
             }
         }
     }
+}
+
+private fun filterUniqueMaFiles(originalMaFiles: List<MaFile>, readMaFiles: List<MaFile>): List<MaFile> {
+    val duplicateMaFiles = readMaFiles.toSet().intersect(originalMaFiles.toSet())
+    val uniqueReadMaFiles = readMaFiles - duplicateMaFiles
+
+    return uniqueReadMaFiles
 }
