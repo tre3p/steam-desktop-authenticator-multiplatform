@@ -7,15 +7,17 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.darkrockstudios.libraries.mpfilepicker.MultipleFilePicker
 import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.START_PADDING
+import com.tre3p.sdamp.model.MaFile
 
 @Composable
-fun TopPanel() {
+fun TopPanel(maFileList: SnapshotStateList<MaFile>) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var showFilesPicker by remember { mutableStateOf(false) }
     var showDirPicker by remember { mutableStateOf(false) }

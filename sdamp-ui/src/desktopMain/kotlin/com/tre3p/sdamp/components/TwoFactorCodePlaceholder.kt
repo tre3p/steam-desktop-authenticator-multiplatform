@@ -11,6 +11,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,7 +22,7 @@ import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.START_PADDING
 
 @Composable
-fun TwoFactorCodePlaceholder(twoFactorCodeText: String) {
+fun TwoFactorCodePlaceholder(twoFactorCodeText: MutableState<String>) {
     Row(
         modifier = Modifier.padding(
             start = START_PADDING,
@@ -31,14 +32,14 @@ fun TwoFactorCodePlaceholder(twoFactorCodeText: String) {
     ) {
         Box(
             modifier = Modifier
-                .border(BorderStroke(1.dp, Color.Black))
+                .border(BorderStroke(2.dp, Color.LightGray))
                 .height(60.dp)
                 .weight(40f),
             contentAlignment = Alignment.Center
         ) {
             SelectionContainer {
                 Text(
-                    text = twoFactorCodeText,
+                    text = twoFactorCodeText.value,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
