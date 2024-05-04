@@ -12,14 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.darkrockstudios.libraries.mpfilepicker.MultipleFilePicker
-import com.tre3p.sdamp.mafile.MaFileReader
+import com.tre3p.sdamp.mafile.MaFileManager
 import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.START_PADDING
 import com.tre3p.sdamp.model.MaFile
 import java.nio.file.Paths
 
 @Composable
-fun TopPanel(maFileList: SnapshotStateList<MaFile>) {
+fun TopPanel(maFileList: SnapshotStateList<MaFile>, maFileManager: MaFileManager) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var showFilesPicker by remember { mutableStateOf(false) }
     var showDirPicker by remember { mutableStateOf(false) }
@@ -54,26 +54,18 @@ fun TopPanel(maFileList: SnapshotStateList<MaFile>) {
         }
         MultipleFilePicker(show = showFilesPicker, fileExtensions = listOf("maFile")) { paths ->
             showFilesPicker = false
-
-            paths?.forEach {
-                val readMaFile = MaFileReader.readMaFile(Paths.get(it.path))
-                if (!maFileList.contains(readMaFile)) maFileList.add(readMaFile)
+            paths?.let {
+                val importedMaFiles = maFileManager.importMaFiles(it.map { p -> Paths.get(p.path) })
+                maFileList.addAll(importedMaFiles)
             }
         }
         DirectoryPicker(show = showDirPicker) {
             showDirPicker = false
 
             it?.let { dirPath ->
-                val readMaFiles = MaFileReader.readMaFileDir(Paths.get(dirPath))
-                maFileList.addAll(filterUniqueMaFiles(maFileList.toList(), readMaFiles))
+                val importedMaFiles = maFileManager.importMaFileDir(Paths.get(dirPath))
+                maFileList.addAll(importedMaFiles)
             }
         }
     }
-}
-
-private fun filterUniqueMaFiles(originalMaFiles: List<MaFile>, readMaFiles: List<MaFile>): List<MaFile> {
-    val duplicateMaFiles = readMaFiles.toSet().intersect(originalMaFiles.toSet())
-    val uniqueReadMaFiles = readMaFiles - duplicateMaFiles
-
-    return uniqueReadMaFiles
 }

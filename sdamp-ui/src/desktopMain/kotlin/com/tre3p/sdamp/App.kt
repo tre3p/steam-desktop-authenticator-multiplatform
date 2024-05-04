@@ -13,24 +13,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tre3p.sdamp.components.TopPanel
 import com.tre3p.sdamp.components.TwoFactorCodePlaceholder
+import com.tre3p.sdamp.mafile.MaFileDirManager
+import com.tre3p.sdamp.mafile.MaFileManager
 import com.tre3p.sdamp.mafile.MaFileReader
 import com.tre3p.sdamp.mafile.getTwoFactor
 import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.MAFILES_DIR_PATH
 import com.tre3p.sdamp.misc.START_PADDING
 import com.tre3p.sdamp.model.MaFile
+import java.nio.file.Paths
 
 @Composable
 @Preview
 fun App() {
-    val maFiles = MaFileReader.readMaFileDir(MAFILES_DIR_PATH.toPath())
+    val maFileManager = initMaFileManager()
+    val maFiles = maFileManager.loadMaFiles()
 
     val twoFactorCodeText = remember { mutableStateOf("") }
     val maFilesListState = remember { mutableStateListOf(*maFiles.toTypedArray()) }
 
     MaterialTheme {
         Column {
-            TopPanel(maFilesListState)
+            TopPanel(maFilesListState, maFileManager)
             TwoFactorCodePlaceholder(twoFactorCodeText)
             // TODO: progress bar
             // TODO: Search text field
@@ -68,4 +72,11 @@ fun MaFilesList(maFilesListState: SnapshotStateList<MaFile>, twoFactorCodeText: 
             }
         }
     }
+}
+
+private fun initMaFileManager(): MaFileManager {
+    return MaFileManager(
+        MaFileReader(),
+        MaFileDirManager(Paths.get(MAFILES_DIR_PATH))
+    )
 }
