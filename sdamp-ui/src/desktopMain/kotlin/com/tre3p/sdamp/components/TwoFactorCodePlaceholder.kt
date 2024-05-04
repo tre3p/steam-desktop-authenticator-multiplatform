@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,12 +43,14 @@ fun TwoFactorCodePlaceholder(twoFactorCodeText: MutableState<String>) {
                 .weight(40f),
             contentAlignment = Alignment.Center
         ) {
-            SelectionContainer {
-                Text(
-                    text = twoFactorCodeText.value,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                SelectionContainer {
+                    Text(
+                        text = twoFactorCodeText.value,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
         Button(
