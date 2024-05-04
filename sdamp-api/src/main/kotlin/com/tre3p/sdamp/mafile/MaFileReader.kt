@@ -3,7 +3,6 @@ package com.tre3p.sdamp.mafile
 import com.tre3p.sdamp.model.MaFile
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
-import kotlin.io.path.isDirectory
 import kotlin.io.path.readText
 import kotlin.io.path.useDirectoryEntries
 
