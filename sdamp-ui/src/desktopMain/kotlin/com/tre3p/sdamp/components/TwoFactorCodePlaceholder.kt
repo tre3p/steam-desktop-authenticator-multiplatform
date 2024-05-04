@@ -15,6 +15,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +25,8 @@ import com.tre3p.sdamp.misc.START_PADDING
 
 @Composable
 fun TwoFactorCodePlaceholder(twoFactorCodeText: MutableState<String>) {
+    val clipboardManager = LocalClipboardManager.current
+
     Row(
         modifier = Modifier.padding(
             start = START_PADDING,
@@ -46,7 +50,7 @@ fun TwoFactorCodePlaceholder(twoFactorCodeText: MutableState<String>) {
             }
         }
         Button(
-            onClick = {},
+            onClick = { clipboardManager.setText(AnnotatedString(twoFactorCodeText.value)) },
             modifier = Modifier
                 .padding(start = 20.dp)
                 .height(60.dp),
