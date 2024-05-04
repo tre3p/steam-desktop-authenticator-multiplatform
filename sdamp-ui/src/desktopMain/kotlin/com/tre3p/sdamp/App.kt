@@ -49,6 +49,7 @@ fun MaFilesList(maFilesListState: SnapshotStateList<MaFile>, twoFactorCodeText: 
         modifier = Modifier
             .padding(start = START_PADDING, end = END_PADDING, top = 20.dp, bottom = 20.dp)
             .border(BorderStroke(2.dp, Color.LightGray))
+            .fillMaxHeight()
     ) {
         Column(
             modifier = Modifier
