@@ -27,7 +27,6 @@ fun App() {
 
     val twoFactorCodeText = remember { mutableStateOf("") }
     val maFilesListState = remember { mutableStateListOf(*maFiles.toTypedArray()) }
-    maFilesListState.add(MaFile("aaasdasdxasdcasdcasdcasdcas", ""))
 
     MaterialTheme {
         Column {

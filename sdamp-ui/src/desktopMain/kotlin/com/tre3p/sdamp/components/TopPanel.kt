@@ -12,9 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.darkrockstudios.libraries.mpfilepicker.MultipleFilePicker
+import com.tre3p.sdamp.mafile.MaFileReader
 import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.START_PADDING
 import com.tre3p.sdamp.model.MaFile
+import java.nio.file.Paths
 
 @Composable
 fun TopPanel(maFileList: SnapshotStateList<MaFile>) {
@@ -50,15 +52,21 @@ fun TopPanel(maFileList: SnapshotStateList<MaFile>) {
                 Text("Import maFile directory")
             }
         }
-        MultipleFilePicker(show = showFilesPicker, fileExtensions = listOf("maFile")) {
+        MultipleFilePicker(show = showFilesPicker, fileExtensions = listOf("maFile")) { paths ->
             showFilesPicker = false
-            // TODO: do something with path
-            println(it)
+
+            paths?.forEach {
+                maFileList.add(MaFileReader.readMaFile(Paths.get(it.path)))
+            }
         }
         DirectoryPicker(show = showDirPicker) {
             showDirPicker = false
-            // TODO: do something with path
             println(it)
+
+            it?.let { dirPath ->
+                println(MaFileReader.readMaFileDir(Paths.get(dirPath)).size)
+                maFileList.addAll(MaFileReader.readMaFileDir(Paths.get(dirPath)))
+            }
         }
     }
 }
