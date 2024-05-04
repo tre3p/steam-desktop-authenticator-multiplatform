@@ -39,7 +39,7 @@ fun MaFilesList(
         ) {
             maFilesListState.forEach {
                 // TODO: change this logic, cause it has performance issues
-                if (it.accountName.startsWith(maFileFilterText.value)) {
+                if (it.accountName.contains(maFileFilterText.value)) {
                     Button(
                         onClick = { twoFactorCodeText.value = it.getTwoFactor() },
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
