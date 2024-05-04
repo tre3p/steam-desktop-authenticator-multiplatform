@@ -2,7 +2,6 @@ package com.tre3p.sdamp.mafile
 
 import com.tre3p.sdamp.model.MaFile
 import java.nio.file.Path
-import kotlin.io.path.useDirectoryEntries
 
 class MaFileManager(
     private val maFileReader: MaFileReader,
@@ -45,15 +44,14 @@ class MaFileManager(
 
         val importedMaFiles = mutableListOf<MaFile>()
 
-        maFileDirPath.useDirectoryEntries("*.maFile") { seq ->
-            seq.map {
-                val readMaFile = maFileReader.readMaFile(it)
+        maFileDirPath.toFile().listFiles()?.forEach {
+            if (it.extension == "maFile") {
+                val readMaFile = maFileReader.readMaFile(it.toPath())
                 if (!maFilesState!!.contains(readMaFile)) {
-                    maFileDirManager.copyMaFileToBaseDir(it)
+                    maFileDirManager.copyMaFileToBaseDir(it.toPath())
                     maFilesState!!.add(readMaFile)
                     importedMaFiles.add(readMaFile)
                 }
-                readMaFile
             }
         }
 
