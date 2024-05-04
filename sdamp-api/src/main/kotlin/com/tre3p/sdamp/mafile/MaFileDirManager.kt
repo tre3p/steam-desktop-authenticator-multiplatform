@@ -12,6 +12,8 @@ class MaFileDirManager(
     }
 
     fun copyMaFileToBaseDir(maFilePath: Path) {
-        println(maFilePath.copyTo(maFileDirPath))
+        val fileNameToMove = maFilePath.fileName
+        val targetPath = maFileDirPath.resolve(fileNameToMove)
+        maFilePath.copyTo(targetPath)
     }
 }

@@ -33,7 +33,6 @@ class MaFileManager(
             }
         }
 
-        println("Imported maFiles size: ${importedMaFiles.size}")
         return importedMaFiles
     }
 
@@ -58,7 +57,6 @@ class MaFileManager(
             }
         }
 
-        println("Imported maFiles size: ${importedMaFiles.size}")
         return importedMaFiles
     }
 }
