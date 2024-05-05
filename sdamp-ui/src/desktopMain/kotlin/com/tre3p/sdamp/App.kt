@@ -4,16 +4,11 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.tre3p.sdamp.components.*
 import com.tre3p.sdamp.mafile.MaFileDirManager
 import com.tre3p.sdamp.mafile.MaFileManager
 import com.tre3p.sdamp.mafile.MaFileReader
-import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.MAFILES_DIR_PATH
-import com.tre3p.sdamp.misc.START_PADDING
 import java.nio.file.Paths
 
 @Composable

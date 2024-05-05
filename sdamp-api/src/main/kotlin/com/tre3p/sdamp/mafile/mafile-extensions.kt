@@ -12,7 +12,7 @@ private const val CHARS = "23456789BCDFGHJKMNPQRTVWXY"
 private const val HMAC_SHA1_ALGO = "HmacSHA1"
 
 fun MaFile.getTwoFactor(): String {
-    val alignedTime = SteamTime.getTimeAlignedWithSteamServer()
+    val alignedTime = SteamTime.getAlignedTime()
     val sharedSecretDecoded = Base64.getDecoder().decode(this.sharedSecret)
 
     val buffer = ByteBuffer.allocate(8)

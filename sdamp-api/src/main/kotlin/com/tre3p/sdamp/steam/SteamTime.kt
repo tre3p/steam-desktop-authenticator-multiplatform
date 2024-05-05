@@ -12,14 +12,14 @@ open class SteamTime {
     companion object Default : SteamTime()
 
     fun getCurrentSteamChunk(): Long {
-        val currentTime = System.currentTimeMillis().toUnixTime() + SteamTimeAligner.timeDifference
-        val currentSteamChunk = currentTime / 30
-        val secondsUntilChunkChange = currentTime - (currentSteamChunk * 30)
+        val steamServerTime = getAlignedTime()
+        val currentSteamChunk = steamServerTime / 30
+        val secondsUntilChunkChange = steamServerTime - (currentSteamChunk * 30)
 
         return 30 - secondsUntilChunkChange
     }
 
-    fun getTimeAlignedWithSteamServer(): Long = System.currentTimeMillis().toUnixTime() + SteamTimeAligner.timeDifference
+    fun getAlignedTime(): Long = System.currentTimeMillis().toUnixTime() + SteamTimeAligner.timeDifference
 
     private open class SteamTimeAligner {
         val timeDifference: Long = getTimeDiffWithSteamServer()
@@ -42,8 +42,7 @@ open class SteamTime {
                     )
 
                 val timeQueryResponse = steamServerResponse.body<TimeQueryResponse>()
-                val steamServerTime = timeQueryResponse.response.serverTime.toLong()
-                System.currentTimeMillis().toUnixTime() - steamServerTime
+                timeQueryResponse.response.serverTime.toLong()
             }
     }
 }
