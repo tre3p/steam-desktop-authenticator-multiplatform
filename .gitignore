@@ -3,7 +3,5 @@
 /.idea
 **/build/
 /.fleet
-gradlew
-gradlew.bat
 gradle/wrapper/*.jar
 /maFiles
