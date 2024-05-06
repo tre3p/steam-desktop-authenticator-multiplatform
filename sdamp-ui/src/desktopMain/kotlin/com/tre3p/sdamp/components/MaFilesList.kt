@@ -26,6 +26,7 @@ fun MaFilesList(
     maFilesListState: SnapshotStateList<MaFile>,
     twoFactorCodeText: MutableState<String>,
     maFileFilterText: MutableState<String>,
+    currentlySelectedMaFile: MutableState<MaFile?>
 ) {
     Box(
         modifier = Modifier
@@ -41,7 +42,7 @@ fun MaFilesList(
                 // TODO: change this logic, cause it has performance issues
                 if (it.accountName.contains(maFileFilterText.value)) {
                     Button(
-                        onClick = { twoFactorCodeText.value = it.getTwoFactor() },
+                        onClick = { twoFactorCodeText.value = it.getTwoFactor(); currentlySelectedMaFile.value = it },
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                         elevation = null,
                         modifier = Modifier.fillMaxWidth().height(50.dp)
