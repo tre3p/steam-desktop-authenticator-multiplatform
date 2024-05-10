@@ -1,12 +1,12 @@
 <h1 align="center">
-    <img src="pic.png" height="600" width=600" />
+    <img src="pic.png"/>
     </br>
-    SDA Multiplatform
+    SDAMP (Steam Desktop Authenticator Multiplatform)
 </h1>
 
 ## Warning
 
-This product comes as is, which means that I don't provide any support, and the project only develops because of the community that uses it. I also don't take any responsibility for how this app will be used, so if you lose your accounts, the blame will be on you. 
+This product comes as is, which means that I don't provide any support, and the project only develops because of the community that uses it. I also don't take any responsibility for how this app will be used, so if you lose your accounts, the blame will be on you.
 
 ## Description
 
@@ -15,52 +15,37 @@ This project is analogous to [Steam Desktop Authenticator](https://github.com/Je
 ## How to use
 
 - Download relevant version of application from [Releases](https://github.com/tre3p/steam-desktop-authenticator-multiplatform/releases) page.
-- Extract application to any folder you want, put your maFiles to maFiles folder and launch the application with following command on Linux/MacOS:
-
-```sh
-chmod +X sda-multiplatform
-./sda-multiplatform
-```
+- Proceed with installation based on system you use
 
 ## Build
 
 ### Windows
 
-- Download and install [Go](https://go.dev/dl/)
-- Install GCC compiler
-- Install Fyne CLI
-```sh
-go install fyne.io/fyne/v2/cmd/fyne@latest
-```
 - Clone project
 - Navigate to folder in which you downloaded application and execute command:
 ```sh
-fyne package
+gradlew.bat packageDistributionForCurrentOs
 ```
-- After you see the executable - place it in another folder and launch it
-- You will see GUI and folder maFiles in folder in which you place executable. Fill this with your maFiles and start using
+- Executable file will be placed in `sdamp-ui/build/compose/binaries/main/app/` folder
+
 
 ### Linux
 
-- Download and install [Go](https://go.dev/dl/)
-- Install GCC compiler
-- Install Fyne CLI
-```sh
-go install fyne.io/fyne/v2/cmd/fyne@latest
-```
 - Clone project
 - Navigate to folder in which you downloaded application and execute command:
 ```sh
-fyne package
+chmod +x gradlew
+./gradlew packageDistributionForCurrentOs
 ```
-- You will see linux executable file. Place it in another folder, launch it, and it will create maFiles directory. Fill maFiles directory with your maFiles
-- Launch application again
+- Executable file will be placed in `sdamp-ui/build/compose/binaries/main/app/` folder
 
 ### MacOS
 
-Coming soon. For now, only executable script available. You can build and launch it using following commands:
-
+- Clone project
+- Navigate to folder in which you downloaded application and execute command:
 ```sh
-go build
+chmod +x gradlew
+./gradlew packageDistributionForCurrentOs
 ```
+- Executable file will be placed in `sdamp-ui/build/compose/binaries/main/app/` folder
 
