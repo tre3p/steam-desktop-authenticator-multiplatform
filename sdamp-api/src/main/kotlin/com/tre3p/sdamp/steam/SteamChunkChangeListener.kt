@@ -8,7 +8,6 @@ import kotlinx.coroutines.launch
 class SteamChunkChangeListener(
     val actionOnChunkChange: () -> Unit
 ) {
-    private val steamChunkOnInit: Long = SteamTime.getCurrentSteamChunk()
     private val steamChunkDuration = 30L
 
     init {
@@ -18,8 +17,15 @@ class SteamChunkChangeListener(
     }
 
     private suspend fun initChunkChangeListener() = coroutineScope {
+        // Since Steam doesn't return milliseconds in response - we need to synchronize milliseconds till chunk change manually
+        val steamChunkOnInit = SteamTime.getCurrentSteamChunk()
+        var refreshedSteamChunk: Long = steamChunkOnInit
+        while (refreshedSteamChunk == steamChunkOnInit) {
+            refreshedSteamChunk = SteamTime.getCurrentSteamChunk()
+        }
+
         // Wait for current chunk to complete
-        delay(steamChunkOnInit * 1000)
+        delay(refreshedSteamChunk * 1000)
 
         // Then wait regular 30 seconds which each chunk takes
         while(true) {
