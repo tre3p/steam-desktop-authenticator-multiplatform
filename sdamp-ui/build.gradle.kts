@@ -35,7 +35,7 @@ compose.desktop {
             }
 
             windows {
-                iconFile.set(project.file("icons/windows.ico"))
+                iconFile.set(project.file("icons/win.ico"))
             }
 
             linux {
