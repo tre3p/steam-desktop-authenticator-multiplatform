@@ -28,7 +28,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "SDAMP"
-            packageVersion = "1.0.0"
+            packageVersion = "2.0.0"
 
             macOS {
                 iconFile.set(project.file("icons/macos.icns"))
