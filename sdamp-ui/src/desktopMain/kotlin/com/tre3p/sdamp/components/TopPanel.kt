@@ -10,19 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
-import com.darkrockstudios.libraries.mpfilepicker.MultipleFilePicker
+import androidx.compose.ui.window.AwtWindow
 import com.tre3p.sdamp.mafile.MaFileManager
 import com.tre3p.sdamp.misc.END_PADDING
 import com.tre3p.sdamp.misc.START_PADDING
 import com.tre3p.sdamp.model.MaFile
+import java.awt.FileDialog
+import java.awt.Frame
+import java.io.File
 import java.nio.file.Paths
 
 @Composable
 fun TopPanel(maFileList: SnapshotStateList<MaFile>, maFileManager: MaFileManager) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var showFilesPicker by remember { mutableStateOf(false) }
-    var showDirPicker by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -44,28 +45,51 @@ fun TopPanel(maFileList: SnapshotStateList<MaFile>, maFileManager: MaFileManager
             DropdownMenuItem(
                 onClick = { showFilesPicker = true; dropdownExpanded = false }
             ) {
-                Text(
-                    text = "Import maFile"
-                )
-            }
-            DropdownMenuItem(onClick = { showDirPicker = true; dropdownExpanded = false }) {
-                Text("Import maFile directory")
+                Text(text = "Import maFiles")
             }
         }
-        MultipleFilePicker(show = showFilesPicker, fileExtensions = listOf("maFile")) { paths ->
-            showFilesPicker = false
-            paths?.let {
-                val importedMaFiles = maFileManager.importMaFiles(it.map { p -> Paths.get(p.path) })
-                maFileList.addAll(importedMaFiles)
-            }
-        }
-        DirectoryPicker(show = showDirPicker) {
-            showDirPicker = false
+        if (showFilesPicker) {
+            FileDialog(
+                allowedExtensions = listOf(".maFile"),
+                onCloseRequest = { paths ->
+                    showFilesPicker = false
 
-            it?.let { dirPath ->
-                val importedMaFiles = maFileManager.importMaFileDir(Paths.get(dirPath))
-                maFileList.addAll(importedMaFiles)
-            }
+                    paths.let {
+                        val importedMaFiles = maFileManager.importMaFiles(it.map { p -> Paths.get(p.path) })
+                        maFileList.addAll(importedMaFiles)
+                    }
+                }
+            )
         }
     }
+}
+
+@Composable
+fun FileDialog(
+    onCloseRequest: (pickedFiles: Set<File>) -> Unit,
+    allowedExtensions: List<String>
+) {
+    val parentFrame: Frame? = null
+
+    AwtWindow(
+        create = {
+            object: FileDialog(parentFrame, "Choose a file", LOAD) {
+                override fun setVisible(b: Boolean) {
+                    super.setVisible(b)
+                    if (b) onCloseRequest(files.toSet())
+                }
+            }.apply {
+                isMultipleMode = true
+
+                setFilenameFilter { _, name ->
+                    allowedExtensions.any {
+                        name.endsWith(it)
+                    }
+                }
+
+                file = allowedExtensions.joinToString(";") { "*$it" }
+            }
+        },
+        dispose = FileDialog::dispose
+    )
 }

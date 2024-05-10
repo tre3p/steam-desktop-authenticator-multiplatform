@@ -16,7 +16,6 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(project(":sdamp-api"))
-            implementation("com.darkrockstudios:mpfilepicker:3.1.0")
         }
     }
 }
