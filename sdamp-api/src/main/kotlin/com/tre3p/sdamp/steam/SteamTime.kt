@@ -11,40 +11,37 @@ private const val STEAM_SERVER_TIME_API_URL = "https://api.steampowered.com/ITwo
 open class SteamTime {
     companion object Default : SteamTime()
 
+    private val httpClient = RetryableHttpClient()
+    private val timeDifference: Long = getTimeDiffWithSteamServer()
+    val alignedTime: Long
+        get() = System.currentTimeMillis().toUnixTime() + timeDifference
+
     fun getCurrentSteamChunk(): Long {
-        val steamServerTime = getAlignedTime()
+        val steamServerTime = alignedTime
         val currentSteamChunk = steamServerTime / 30
         val secondsUntilChunkChange = steamServerTime - (currentSteamChunk * 30)
 
         return 30 - secondsUntilChunkChange
     }
 
-    fun getAlignedTime(): Long = System.currentTimeMillis().toUnixTime() + SteamTimeAligner.timeDifference
+    fun getTimeDiffWithSteamServer(): Long {
+        val currentTimeUnix = System.currentTimeMillis().toUnixTime()
+        val steamTimeMillis = getSteamServerTime()
 
-    private open class SteamTimeAligner {
-        val timeDifference: Long = getTimeDiffWithSteamServer()
-
-        companion object Default : SteamTimeAligner()
-
-        fun getTimeDiffWithSteamServer(): Long {
-            val currentTimeUnix = System.currentTimeMillis().toUnixTime()
-            val steamTimeMillis = getSteamServerTime()
-
-            return steamTimeMillis - currentTimeUnix
-        }
-
-        private fun getSteamServerTime(): Long =
-            runBlocking {
-                val steamServerResponse =
-                    RetryableHttpClient.executeRequest(
-                        STEAM_SERVER_TIME_API_URL,
-                        requestMethod = HttpMethod.Post,
-                    )
-
-                val timeQueryResponse = steamServerResponse.body<TimeQueryResponse>()
-                timeQueryResponse.response.serverTime.toLong()
-            }
+        return steamTimeMillis - currentTimeUnix
     }
+
+    private fun getSteamServerTime(): Long =
+        runBlocking {
+            val steamServerResponse =
+                httpClient.executeRequest(
+                    requestUrl = STEAM_SERVER_TIME_API_URL,
+                    requestMethod = HttpMethod.Post,
+                )
+
+            val timeQueryResponse = steamServerResponse.body<TimeQueryResponse>()
+            timeQueryResponse.response.serverTime.toLong()
+        }
 }
 
 fun Long.toUnixTime() = this / 1000L
