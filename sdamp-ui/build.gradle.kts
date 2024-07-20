@@ -14,7 +14,12 @@ kotlin {
     sourceSets {
         val desktopMain by getting
         desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(compose.desktop.currentOs) {
+                version {
+                    strictly("1.6.11")
+                }
+            }
+
             implementation(project(":sdamp-api"))
         }
     }
